@@ -1,58 +1,171 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace ZXC
 {
-    public delegate void OnMsgHandler<T>(T args);
-
-    public class MsgCenter<T> : ZSingleton<MsgCenter<T>>
+    public static class MsgCenter
     {
-        private Dictionary<uint, List<OnMsgHandler<T>>> msgHandlerDic;
+        private static Dictionary<uint, Delegate> msgHandlerDic = new Dictionary<uint, Delegate>();
 
-        private MsgCenter()
+        #region Register UnRegster Send Msg API
+        public static void RegisterMsg(uint msg, OnMsgHandler handler)
         {
-            msgHandlerDic =new Dictionary<uint, List<OnMsgHandler<T>>>();
+            OnRegisterMsg(msg, handler);
+            msgHandlerDic[msg] = (OnMsgHandler)msgHandlerDic[msg] + handler;
         }
 
-        public void RegisterMsg(uint msg, OnMsgHandler<T> handler)
+        public static void RegisterMsg<T>(uint msg, OnMsgHandler<T> handler)
         {
-            if (msgHandlerDic.ContainsKey(msg))
+            OnRegisterMsg(msg, handler);
+            msgHandlerDic[msg] = (OnMsgHandler<T>)msgHandlerDic[msg] + handler;
+        }
+
+        public static void RegisterMsg<T, U>(uint msg, OnMsgHandler<T, U> handler)
+        {
+            OnRegisterMsg(msg, handler);
+            msgHandlerDic[msg] = (OnMsgHandler<T, U>)msgHandlerDic[msg] + handler;
+        }
+
+        public static void RegisterMsg<T, U, V>(uint msg, OnMsgHandler<T, U, V> handler)
+        {
+            OnRegisterMsg(msg, handler);
+            msgHandlerDic[msg] = (OnMsgHandler<T, U, V>)msgHandlerDic[msg] + handler;
+        }
+
+        public static void UnRegisterMsg(uint msg, OnMsgHandler handler)
+        {
+            OnUnRegisterMsg(msg, handler);
+            msgHandlerDic[msg] = (OnMsgHandler)msgHandlerDic[msg] - handler;
+        }
+
+        public static void UnRegisterMsg<T>(uint msg, OnMsgHandler<T> handler)
+        {
+            OnUnRegisterMsg(msg, handler);
+            msgHandlerDic[msg] = (OnMsgHandler<T>)msgHandlerDic[msg] - handler;
+        }
+
+        public static void UnRegisterMsg<T, U>(uint msg, OnMsgHandler<T, U> handler)
+        {
+            OnUnRegisterMsg(msg, handler);
+            msgHandlerDic[msg] = (OnMsgHandler<T, U>)msgHandlerDic[msg] - handler;
+        }
+
+        public static void UnRegisterMsg<T, U, V>(uint msg, OnMsgHandler<T, U, V> handler)
+        {
+            OnUnRegisterMsg(msg, handler);
+            msgHandlerDic[msg] = (OnMsgHandler<T, U, V>)msgHandlerDic[msg] - handler;
+        }
+
+        public static void SendMsg(uint msg)
+        {
+            OnSendMsg(msg);
+            (msgHandlerDic[msg] as OnMsgHandler)();            
+        }
+
+        public static void SendMsg<T>(uint msg, T args)
+        {
+            OnSendMsg(msg);
+            (msgHandlerDic[msg] as OnMsgHandler<T>)(args);
+        }
+
+        public static void SendMsg<T, U>(uint msg, T argsT, U argsU)
+        {
+            OnSendMsg(msg);
+            (msgHandlerDic[msg] as OnMsgHandler<T, U>)(argsT, argsU);            
+        }
+
+        public static void SendMsg<T, U, V>(uint msg, T argsT, U argsU, V argsV)
+        {
+            OnSendMsg(msg);
+            (msgHandlerDic[msg] as OnMsgHandler<T, U, V>)(argsT, argsU, argsV);            
+        }
+        #endregion
+
+        #region Public API
+        public static void Clear()
+        {
+            List<uint> msgToRemoveList = new List<uint>();
+
+            foreach(KeyValuePair<uint, Delegate> pair in msgHandlerDic) 
             {
-                if (msgHandlerDic[msg].Contains(handler))
-                    return;
-                msgHandlerDic[msg].Add(handler);
+                msgToRemoveList.Add(pair.Key);
+            }
+            foreach(uint msg in msgToRemoveList) 
+            {
+                msgHandlerDic.Remove(msg);
+            }
+        }
+
+        public static void PrintMsgDic()
+        {
+            ZLog.Debug("\t\t\t=== MESSENGER PrintEventTable ===");
+            foreach(KeyValuePair<uint, Delegate> pair in msgHandlerDic) 
+            {
+                ZLog.Debug("\t\t\t" + pair.Key + "\t\t" + pair.Value);
+            }
+            ZLog.Debug("\n");
+        }
+        #endregion
+
+        private static void OnRegisterMsg(uint msg, Delegate d)
+        {
+            Delegate del;
+            if (msgHandlerDic.TryGetValue(msg, out del))
+            {
+                if(del != null && del.GetType() != d.GetType())
+                {
+                    throw new MsgCenterException(string.Format("Attemp to add listener with inconsistent signature for msg {0}. Current listeners have type {1} and listener being added has type {2}", msg, del.GetType().Name, d.GetType().Name));
+                }
             }
             else
             {
-                msgHandlerDic.Add(msg, new List<OnMsgHandler<T>> { handler });
+                msgHandlerDic.Add(msg, null);
             }
         }
 
-        public void UnRegisterMsg(uint msg, OnMsgHandler<T> handler)
+        private static void OnUnRegisterMsg(uint msg, Delegate d)
         {
-            if (!msgHandlerDic.ContainsKey(msg))
-                return;
-            foreach (var handlerItem in msgHandlerDic[msg])
+            Delegate del;
+            if(msgHandlerDic.TryGetValue(msg, out del))
             {
-                if (handlerItem == handler)
+                if(del == null)
                 {
-                    msgHandlerDic[msg].Remove(handler);
-                    if (msgHandlerDic[msg].Count == 0)
-                        msgHandlerDic.Remove(msg);
-                    return;
+                    throw new MsgCenterException(string.Format("Attempting to remove listener with for msg \"{0}\" but current listener is null.", msg));
+                }
+                else if(del.GetType() != d.GetType())
+                {
+                    throw new MsgCenterException(string.Format("Attempting to remove listener with inconsistent signature for msg {0}. Current listeners have type {1} and listener being removed has type {2}", msg, del.GetType().Name, d.GetType().Name));
                 }
             }
+            else
+            {
+                throw new MsgCenterException(string.Format("Attempting to remove listener for type \"{0}\" but MsgCenter doesn't know about this event type.", msg));
+            }
         }
 
-        public void SendMsg(uint msg, T args)
+        private static void OnRemovedMsg(uint msg)
         {
-            if (!msgHandlerDic.ContainsKey(msg))
-                return;
-            foreach (var handlerItem in msgHandlerDic[msg])
+            if(msgHandlerDic[msg] == null)
             {
-                if(handlerItem != null)
-                    handlerItem(args);
+                msgHandlerDic.Remove(msg);
+            }
+        }
+
+        private static void OnSendMsg(uint msg)
+        {
+            Delegate del;
+            if(msgHandlerDic.TryGetValue(msg, out del))
+            {
+                if(del == null)
+                {
+                    throw new MsgCenterException(string.Format("Broadcasting message \"{0}\" but current listener is null.", msg));
+                }
+            }
+            else
+            {
+                throw new MsgCenterException(string.Format("Broadcasting message \"{0}\" but MsgCenter doesn't know about this msg.", msg));
             }
         }
     }
