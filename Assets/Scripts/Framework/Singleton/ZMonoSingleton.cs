@@ -34,9 +34,22 @@ namespace ZXC
             }
         }
 
+        void Awake()
+        {
+            AfterAwake();
+        }
+
+        protected virtual void AfterAwake()
+        {
+        }
+
         protected virtual void OnDestroy()
         {
             instance = null;
+        }
+
+        public virtual void Init()
+        {
         }
     }
 }

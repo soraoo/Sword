@@ -15,13 +15,16 @@ namespace ZXC
         private Queue<IZView> closeViewQueue;
         
         private const float CHECK_CLOSE_TIME = 10f;
-
-        void Awake()
+        
+        protected override void AfterAwake()
         {
             controllerDic = new Dictionary<IZController, List<IZView>>();
             viewDic = new Dictionary<IZView, IZController>();
             closeViewQueue = new Queue<IZView>();
+        }
 
+        void Start()
+        {
             StartCoroutine(CheckCloseView());
         }
 
