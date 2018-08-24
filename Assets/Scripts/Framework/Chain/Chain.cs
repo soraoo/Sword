@@ -1,5 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using UnityEngine;
 
 namespace ZXC
 {
@@ -61,6 +64,42 @@ namespace ZXC
             return this;
         }
 
+        public Chain Coroutine(IEnumerator enumerator)
+        {
+            WaitNext((next, Kill) =>
+            {
+                ChainMgr.Instance.StartCoroutine(WaitCoroutine(enumerator, next));
+            });
+            return this;
+        }
+
+        public Chain Coroutine(Coroutine co)
+        {
+            WaitNext((next, kill) =>
+            {
+                ChainMgr.Instance.StartCoroutine(WaitCoroutine(co, next));
+            });
+            return this;
+        }
+
+        public Chain WaitForSeconds(float time)
+        {
+            WaitNext((next, kill) =>
+            {
+                ChainMgr.Instance.StartCoroutine(WaitCoroutine(time, next));
+            });
+            return this;
+        }
+
+        public Chain WaitForFrame(int frameCount)
+        {
+            WaitNext((next, kill) =>
+            {
+                ChainMgr.Instance.StartCoroutine(WaitCoroutine(frameCount, next));
+            });
+            return this;
+        }
+
         #endregion
 
         private Chain()
@@ -107,6 +146,34 @@ namespace ZXC
                 chainQueue.Clear();
                 chainQueue = null;
             }
+        }
+
+        private IEnumerator WaitCoroutine(IEnumerator enumerator, Action next)
+        {
+            yield return ChainMgr.Instance.StartCoroutine(enumerator);
+            next();
+        }
+
+        private IEnumerator WaitCoroutine(Coroutine co, Action next)
+        {
+            yield return co;
+            next();
+        }
+
+        private IEnumerator WaitCoroutine(float time, Action next)
+        {
+            yield return new WaitForSeconds(time);
+            next();
+        }
+
+        private IEnumerator WaitCoroutine(int frameCount, Action next)
+        {
+            while (frameCount > 0)
+            {
+                yield return null;
+                frameCount--;
+            }
+            next();
         }
     }
 }
