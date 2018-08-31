@@ -26,9 +26,9 @@ namespace ZXC.Factory
             poolCount = 0;
         }
 
-        public object CreateObject<T>() where T : class
+        public T CreateObject<T>() where T : class
         {
-            return GetObject(typeof(T));
+            return GetObject(typeof(T)) as T;
         }
 
         public void ReleaseObject(object obj)

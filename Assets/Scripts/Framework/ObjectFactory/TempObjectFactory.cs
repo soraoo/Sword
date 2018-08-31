@@ -6,11 +6,11 @@ namespace ZXC.Factory
 {
     public sealed class TempObjectFactory : IObjectFactory
     {
-        public object CreateObject<T>() where T : class
+        public T CreateObject<T>() where T : class
         {
             var type = typeof(T);
             var instance = ZInstanceUtility.CreateInstance(type);
-            return instance;
+            return instance as T;
         }
 
         public void ReleaseObject(object obj)

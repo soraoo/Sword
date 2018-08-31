@@ -24,18 +24,18 @@ namespace ZXC.Factory
             }
         }
 
-        public object CreateObject<T>() where T : class
+        public T CreateObject<T>() where T : class
         {
             var type = typeof(T);
             if (cacheSingleObjectDic.ContainsKey(type))
             {
-                return cacheSingleObjectDic[type];
+                return cacheSingleObjectDic[type] as T;
             }
             lock (lockObj)
             {
                 var instance = ZInstanceUtility.CreateInstance(type);
                 cacheSingleObjectDic.Add(type, instance);
-                return cacheSingleObjectDic[type];
+                return cacheSingleObjectDic[type] as T;
             }
         }
 
