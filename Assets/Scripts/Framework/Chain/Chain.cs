@@ -18,19 +18,19 @@ namespace ZXC
 
         #region API
 
-        public Chain Start()
+        public static Chain Start()
         {
             var chain = new Chain();
             return chain;
         }
 
-        public Chain Start(Action callback)
+        public static Chain Start(Action callback)
         {
             var chain = new Chain();
             return chain.Then(callback);
         }
 
-        public Chain Start(ChainThenDelegate callback)
+        public static Chain Start(ChainThenDelegate callback)
         {
             var chain = new Chain();
             return chain.Then(callback);

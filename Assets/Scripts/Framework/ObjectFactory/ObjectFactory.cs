@@ -14,7 +14,7 @@ namespace ZXC
 
     public static class ObjectFactory
     {
-        private static readonly int MaxPoolCount = 100;
+        private static readonly int MaxPoolCount = 1000;
         private static readonly bool LimitPoolCount = false;
         private static SingleObjectFactory singleObjectFactory = new SingleObjectFactory();
         private static TempObjectFactory tempObjectFactory = new TempObjectFactory();

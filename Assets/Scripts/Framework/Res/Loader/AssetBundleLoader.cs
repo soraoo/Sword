@@ -4,39 +4,67 @@ using UnityEngine;
 
 namespace ZXC.Res
 {
-    public class AssetBundleLoader : BaseLoader
+    public class AssetBundleLoader : IAssetLoader
     {
-        public AssetBundle assetBundle
+        public UnityEngine.Object Asset { get; private set; }
+
+        public bool IsCompleted { get; private set; }
+
+        public bool IsSuccess { get; private set; }
+
+        public bool IsError { get; private set; }
+
+        public string ErrorMsg { get; private set; }
+
+        public float Progress { get; private set; }
+
+        public object ResultObject { get { return Asset; } }
+
+        private AssetId assetId;
+
+        /// <summary>
+        /// 释放引用
+        /// </summary>
+        public void Dispose()
         {
-            get
-            {
-                return ResultObject as AssetBundle;
-            }
+            assetId = null;
+            Asset = null;
+            OnDispose();
         }
 
-        protected override void Init()
+        public void Init(AssetId assetId)
         {
-            
+            this.assetId = assetId;
+            IsCompleted = false;
+            IsSuccess = false;
+            IsError = false;
+            ErrorMsg = string.Empty;
+            Progress = 0f;
         }
 
-        protected override bool IsDone()
+        public void LoadAsync<T>(LoadAssetDelegate<T> onFinished)
+            where T : UnityEngine.Object
         {
-            return false;
+            Chain.Start()
+                .Coroutine(DoLoadAssetBundleAsync<T>())
+                .Then(next =>
+                {
+                    onFinished(IsSuccess, ErrorMsg, Asset as T);
+                    next();
+                });
         }
 
-        protected override string Error()
+        /// <summary>
+        /// 子类析构
+        /// </summary>
+        protected void OnDispose()
         {
-            return "";
+
         }
 
-        protected override float GetProgress()
+        private IEnumerator DoLoadAssetBundleAsync<T>()
         {
-            return 0f;
-        }
-
-        public override void Dispose()
-        {
-
+            yield return null;
         }
     }
 }
