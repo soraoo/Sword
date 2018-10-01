@@ -6,6 +6,5 @@ namespace ZXC
     {
         public MsgCenterException(string msg):base(msg){}
 
-
     }
 }

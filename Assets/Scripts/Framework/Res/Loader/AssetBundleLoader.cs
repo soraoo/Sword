@@ -14,7 +14,7 @@ namespace ZXC.Res
             }
         }
 
-        protected override void Init()
+        protected override void Init(LoadDelegate onFinished)
         {
             
         }

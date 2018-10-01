@@ -10,7 +10,7 @@ namespace ZXC.Res
 
         private static Dictionary<Type, Dictionary<string, BaseLoader>> loaderPoolDic = new Dictionary<Type, Dictionary<string, BaseLoader>>();
 
-        public static T CreateLoader<T>(string path, LoadDelegate onFinished)
+        public static T CreateLoader<T, U>(string path, LoadDelegate onFinished)
             where T : BaseLoader
         {
             Dictionary<string, BaseLoader> loaderDic = GetLoaderDic(typeof(T));
@@ -19,7 +19,7 @@ namespace ZXC.Res
             {
                 loader = ObjectFactory.GetFactory(FactoryType.Pool).CreateObject<BaseLoader>();
                 loaderDic[path] = loader;
-                loader.Init();
+                loader.Init(onFinished);
             }
             loader.RefCount++;
             return loader as T;
@@ -88,7 +88,7 @@ namespace ZXC.Res
             ResultObject = null;
         }
 
-        protected virtual void Init()
+        protected virtual void Init(LoadDelegate onFinished)
         {
             ResultObject = null;
         }
