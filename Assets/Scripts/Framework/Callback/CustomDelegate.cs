@@ -21,8 +21,7 @@ namespace ZXC
 
     #region Loader Callback
 
-    public delegate void LoadDelegate(bool isOk, string err, object result);
-    public delegate void LoadAssetBundleDelegate(bool isOk, string err, AssetBundle bundle);
+    public delegate void LoadDelegate(bool isOk, string err, UnityEngine.Object result);
     public delegate void LoadAssetDelegate<T>(bool isOk, string err, T asset) where T : UnityEngine.Object;
 
     #endregion
