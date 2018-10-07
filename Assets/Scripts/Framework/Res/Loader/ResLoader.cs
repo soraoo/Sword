@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ZXC.Res
 {
-    public class AssetBundleLoader : IAssetLoader
+    public class ResLoader : IAssetLoader
     {
         public UnityEngine.Object Asset { get; private set; }
 
@@ -20,21 +20,25 @@ namespace ZXC.Res
 
         public object ResultObject { get { return Asset; } }
 
-        private string bundleId;
+        private string resId;
+        /// <summary>
+        /// res belong to assetbundle
+        /// </summary>
+        private AssetBundle assetBundle;
 
         /// <summary>
         /// 释放引用
         /// </summary>
         public void Dispose()
         {
-            bundleId = null;
+            resId = null;
             Asset = null;
             OnDispose();
         }
 
         public void Init(string assetId)
         {
-            this.bundleId = assetId;
+            this.resId = assetId;
             IsCompleted = false;
             IsSuccess = false;
             IsError = false;
@@ -54,6 +58,11 @@ namespace ZXC.Res
                 });
         }
 
+        protected ResLoader(AssetBundle assetBundle)
+        {
+            this.assetBundle = assetBundle;
+        }
+
         /// <summary>
         /// 子类析构
         /// </summary>
@@ -64,7 +73,7 @@ namespace ZXC.Res
 
         private IEnumerator DoLoadAssetBundleAsync<T>()
         {
-            var request = AssetBundle.LoadFromFileAsync(bundleId);
+            var request = assetBundle.LoadAssetAsync(resId);
             while(!request.isDone)
             {
                 Progress = request.progress;
@@ -72,7 +81,7 @@ namespace ZXC.Res
             }
             Progress = 1f;
             IsCompleted = request.isDone;
-            Asset = request.assetBundle;
+            Asset = request.asset;
             IsSuccess = Asset != null;
             IsError = Asset == null;
             if(IsError && Asset == null)

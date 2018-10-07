@@ -4,38 +4,34 @@ namespace ZXC
 {
     public class AssetId
     {
-        public int PackId { get; private set; }
+        public string BundleId { get; private set; }
 
-        public int GroupId { get; private set; }
-
-        public int ResId { get; private set; }
+        public string ResId { get; private set; }
 
         /// <summary>
         /// 创建AssetId的工厂方法（未使用Pool，而是直接new）
         /// </summary>
-        /// <param name="packId"></param>
-        /// <param name="groupId"></param>
-        /// <param name="resId"></param>
+        /// <param name="bundleName"></param>
+        /// <param name="resName"></param>
         /// <returns></returns>
-        public static AssetId Create(int packId, int groupId, int resId)
+        public static AssetId Create(string bundleId, string resId)
         {
-            return new AssetId(packId, groupId, resId);
+            return new AssetId(bundleId, resId);
         }
 
-        public AssetId(int packId, int groupId, int resId)
+        public AssetId(string bundleId, string resId)
         {
-            PackId = packId;
-            GroupId = groupId;
+            BundleId = bundleId;
             ResId = resId;
         }
 
         /// <summary>
         /// 格式化输出
         /// </summary>
-        /// <returns>P/G/R</returns>
+        /// <returns>B/R</returns>
         public override string ToString()
         {
-            return PackId + "/" + GroupId + "/" + ResId;
+            return BundleId + "/" + ResId;
         }
 
         public override bool Equals(object obj)
@@ -57,15 +53,13 @@ namespace ZXC
 
         public static bool operator == (AssetId lhs, AssetId rhs)
         {
-            return lhs.PackId == rhs.PackId &&
-                lhs.GroupId == rhs.GroupId && 
+            return lhs.BundleId == rhs.BundleId &&
                 lhs.ResId == rhs.ResId;
         }
 
         public static bool operator != (AssetId lhs, AssetId rhs)
         {
-            return lhs.PackId != rhs.PackId || 
-                lhs.GroupId != rhs.GroupId || 
+            return lhs.BundleId != rhs.BundleId || 
                 lhs.ResId == rhs.ResId;
         }
     }

@@ -24,7 +24,7 @@ namespace ZXC.Factory
             }
         }
 
-        public T CreateObject<T>() where T : class
+        public T CreateObject<T>(params object[] param) where T : class
         {
             var type = typeof(T);
             if (cacheSingleObjectDic.ContainsKey(type))
@@ -33,7 +33,7 @@ namespace ZXC.Factory
             }
             lock (lockObj)
             {
-                var instance = ZInstanceUtility.CreateInstance(type);
+                var instance = ZInstanceUtility.CreateInstance(type, param);
                 cacheSingleObjectDic.Add(type, instance);
                 return cacheSingleObjectDic[type] as T;
             }

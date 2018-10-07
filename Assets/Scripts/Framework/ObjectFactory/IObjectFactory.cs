@@ -6,7 +6,7 @@ namespace ZXC.Factory
 {
     public interface IObjectFactory
     {
-        T CreateObject<T>() where T : class;
+        T CreateObject<T>(params object[] param) where T : class;
         void ReleaseObject(object obj);
     }
 }
