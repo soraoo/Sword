@@ -50,7 +50,7 @@ namespace ZXC.Res
             where T : UnityEngine.Object
         {
             Chain.Start()
-                .Coroutine(DoLoadAssetBundleAsync<T>())
+                .Coroutine(DoLoadResAsync())
                 .Then(next =>
                 {
                     onFinished(IsSuccess, ErrorMsg, Asset as T);
@@ -71,7 +71,7 @@ namespace ZXC.Res
             
         }
 
-        private IEnumerator DoLoadAssetBundleAsync<T>()
+        private IEnumerator DoLoadResAsync()
         {
             var request = assetBundle.LoadAssetAsync(resId);
             while(!request.isDone)
