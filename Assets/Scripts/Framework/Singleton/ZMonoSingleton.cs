@@ -48,8 +48,13 @@ namespace ZXC
             instance = null;
         }
 
-        public virtual void Init()
+        public virtual void Init(OnFinishedDelegate onFinished = null)
         {
+        }
+
+        public virtual IEnumerator Init()
+        {
+            yield return null;
         }
     }
 }

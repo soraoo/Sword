@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -8,19 +9,20 @@ namespace ZXC
 {
     public class ResMgr : ZMonoSingleton<ResMgr>
     {
-        private Dictionary<string, Object> cacheResDic;
+        private HashSet<string> permanentAssetBundleHashSet;
         private Dictionary<string, AssetBundle> cacheAssetBundleDic;
+        private Dictionary<string, Object> cacheResDic;
 
-        protected override void AfterAwake()
+        public override IEnumerator Init()
         {
-            cacheResDic = new Dictionary<string, Object>();
-            cacheAssetBundleDic = new Dictionary<string, AssetBundle>();
+            //缓存全局ab
+            yield return base.Init();
         }
 
         public void LoadAsset<T>(AssetId assetId, LoadAssetDelegate<T> onFinished) where T : Object
         {
             Object asset = null;
-            if(cacheResDic.TryGetValue(assetId.ResId, out asset))
+            if (cacheResDic.TryGetValue(assetId.ResId, out asset))
             {
                 onFinished(true, string.Empty, asset as T);
             }
@@ -33,7 +35,16 @@ namespace ZXC
 #endif
             }
         }
+
+        protected override void AfterAwake()
+        {
+            permanentAssetBundleHashSet = new HashSet<string>();
+            cacheResDic = new Dictionary<string, Object>();
+            cacheAssetBundleDic = new Dictionary<string, AssetBundle>();
+        }
+
         
+
         private void LoadAssetFromLocal<T>(AssetId assetId, LoadAssetDelegate<T> onFinished) where T : Object
         {
             T asset = null;
@@ -41,9 +52,9 @@ namespace ZXC
             string errMsg = string.Empty;
             try
             {
-               asset  = AssetDatabase.LoadAssetAtPath<T>(assetId.ToString());
+                asset = AssetDatabase.LoadAssetAtPath<T>(assetId.ToString());
             }
-            catch(System.Exception e)
+            catch (System.Exception e)
             {
                 isSuccess = false;
                 errMsg = e.ToString();

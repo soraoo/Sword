@@ -3,6 +3,12 @@ using UnityEngine;
 
 namespace ZXC
 {
+    #region CommonHandler
+
+    public delegate void OnFinishedDelegate();
+
+    #endregion
+
     #region MsgHandler
 
     public delegate void OnMsgHandler();
