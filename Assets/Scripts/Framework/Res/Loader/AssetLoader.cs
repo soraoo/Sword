@@ -45,7 +45,7 @@ namespace ZXC.Res
             OnDispose();
         }
 
-        protected void Init(string assetPath)
+        protected void InitAssetInfo(string assetPath)
         {
             assetInfo = new AssetInfo<T>();
             assetInfo.AssetPath = assetPath;
@@ -73,10 +73,7 @@ namespace ZXC.Res
 
         private IAsyncOperation<T> LoadAsync(string path, AssetBundle assetBundle, IEnumerator itor)
         {
-            if (assetInfo == null)
-            {
-                Init(path);
-            }
+            InitAssetInfo(path);
             asc = new AsyncCompletionSource<T>();
             Chain.Start()
                 .Coroutine(itor);

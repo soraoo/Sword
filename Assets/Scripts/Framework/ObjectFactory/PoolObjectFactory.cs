@@ -3,9 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ZXC.Factory {
-    public sealed class PoolObjectFactory : IObjectFactory {
-        private class PoolData {
+namespace ZXC.Factory
+{
+    public sealed class PoolObjectFactory : IObjectFactory
+    {
+        private class PoolData
+        {
             public bool InUse { get; set; }
             public object Obj { get; set; }
         }
@@ -15,61 +18,62 @@ namespace ZXC.Factory {
         private readonly bool limitCount;
         private int poolCount;
 
-        public PoolObjectFactory (int maxPoolCount, bool limitCount) 
+        public PoolObjectFactory(int maxPoolCount, bool limitCount)
         {
             this.maxPoolCount = maxPoolCount;
             this.limitCount = limitCount;
-            poolList = new List<PoolData> ();
+            poolList = new List<PoolData>();
             poolCount = 0;
         }
 
-        public T CreateObject<T> (params object[] param) where T : class 
+        public T CreateObject<T>(params object[] param) where T : class
         {
-            return GetObject (typeof (T), param) as T;
+            return GetObject(typeof(T), param) as T;
         }
 
-        public void ReleaseObject (object obj) 
+        public void ReleaseObject(object obj)
         {
-            if (poolCount > maxPoolCount) 
+            if (poolCount > maxPoolCount)
             {
-                if (obj is IDisposable) 
+                if (obj is IDisposable)
                 {
-                    (obj as IDisposable).Dispose ();
+                    (obj as IDisposable).Dispose();
                 }
-                var poolData = GetPoolData (obj);
-                lock (poolList) 
+                var poolData = GetPoolData(obj);
+                lock (poolList)
                 {
-                    poolList.Remove (poolData);
+                    poolList.Remove(poolData);
                 }
-            } 
+            }
             else
             {
-                RecycleObject (obj);
+                RecycleObject(obj);
             }
         }
 
-        private object GetObject (Type type, params object[] param) 
+        private object GetObject(Type type, params object[] param)
         {
-            lock (poolList) 
+            lock (poolList)
             {
-                for (int i = 0; i < poolCount; i++) 
+                for (int i = 0; i < poolCount; i++)
                 {
                     var poolData = poolList[i];
-                    if (!poolData.InUse) 
+                    if (!poolData.InUse)
                     {
                         poolData.InUse = true;
                         return poolData.Obj;
                     }
                 }
 
-                if (poolCount >= maxPoolCount && limitCount) 
+                if (poolCount >= maxPoolCount && limitCount)
                 {
-                    ZLog.Warning ("object pool has max");
+                    ZLog.Warning("object pool has max");
                     return null;
                 }
 
-                object obj = ZInstanceUtility.CreateInstance (type, param);
-                var newPoolData = new PoolData {
+                object obj = ZInstanceUtility.CreateInstance(type, param);
+                var newPoolData = new PoolData
+                {
                     InUse = false,
                     Obj = obj
                 };
@@ -79,24 +83,24 @@ namespace ZXC.Factory {
             }
         }
 
-        private void RecycleObject (object obj) 
+        private void RecycleObject(object obj)
         {
-            lock (poolList) 
+            lock (poolList)
             {
-                var poolData = GetPoolData (obj);
-                if (poolData != null) 
+                var poolData = GetPoolData(obj);
+                if (poolData != null)
                 {
                     poolData.InUse = false;
                 }
             }
         }
 
-        private PoolData GetPoolData (object obj) 
+        private PoolData GetPoolData(object obj)
         {
-            for (int i = 0; i < poolCount; i++) 
+            for (int i = 0; i < poolCount; i++)
             {
                 var poolData = poolList[i];
-                if (poolData == obj) 
+                if (poolData == obj)
                 {
                     return poolData;
                 }
