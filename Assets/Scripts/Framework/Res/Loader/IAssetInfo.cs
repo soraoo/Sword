@@ -2,9 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using ZXC.Res;
 
-namespace ZXC
+namespace ZXC.Res
 {
     public interface IAssetInfo<T> : IAsyncObject, IDisposable
     {
