@@ -43,7 +43,12 @@ namespace ZXC
             cacheAssetBundleDic = new Dictionary<string, AssetBundle>();
         }
 
-        
+        // private IEnumerator DoInit()
+        // {
+        //     //load asset bundle mainifest
+        //     AssetBundle assetBundle = AssetBundle.LoadFromFile(string.Format("{0}/{1}", ResUtility.GetAssetBundlesPath(), ResUtility.ASSET_BUNDLE_FOLDER_NAME));
+        //     AssetBundleManifest manifest = assetBundle.LoadAsset<AssetBundleManifest>(ResUtility.ASSET_BUNDLE_MANIFEST);
+        // }
 
         private void LoadAssetFromLocal<T>(AssetId assetId, LoadAssetDelegate<T> onFinished) where T : Object
         {
